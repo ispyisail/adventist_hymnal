@@ -8,7 +8,7 @@ def convert_to_chordpro(input_dir, output_dir):
     for filename in os.listdir(input_dir):
         if filename.endswith(".txt"):
             filepath = os.path.join(input_dir, filename)
-            with open(filepath, 'r') as f:
+            with open(filepath, 'r', encoding='utf-8') as f:
                 lines = f.readlines()
 
             # Extract title and hymn number
