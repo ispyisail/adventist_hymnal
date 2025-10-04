@@ -38,11 +38,12 @@ def convert_to_chordpro_zip():
                             print(f"Skipping file with invalid title format: {file_path}")
                             continue
 
+                        hymn_number_str = title_parts[0]
                         title = title_parts[1].strip()
 
                         # Build content in memory
                         output_content = []
-                        output_content.append(f"{{title: {title}}}")
+                        output_content.append(f"{{title: {title} (Hymn #{int(hymn_number_str)})}}")
                         output_content.append("")
 
                         # Verses
@@ -50,12 +51,23 @@ def convert_to_chordpro_zip():
                         for line in lines[2:]:
                             stripped_line = line.strip()
                             if re.match(r'^\d+$', stripped_line):
+                                # This is a verse number, indicating a new verse.
                                 if in_verse:
-                                    output_content.append("")
+                                    # close previous verse
+                                    output_content.append("{end_of_verse}")
+                                    output_content.append("") # blank line between verses
+
+                                # start new verse
                                 output_content.append(f"{{comment: Verse {stripped_line}}}")
+                                output_content.append("{start_of_verse}")
                                 in_verse = True
                             elif stripped_line:
+                                # Lyric line
                                 output_content.append(stripped_line)
+
+                        # after the loop, if we were in a verse, we need to close it.
+                        if in_verse:
+                            output_content.append("{end_of_verse}")
 
                         # Write content to zip
                         zf.writestr(output_filename, '\n'.join(output_content))
